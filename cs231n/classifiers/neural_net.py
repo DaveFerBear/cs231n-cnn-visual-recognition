@@ -76,10 +76,9 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         
-        L1 = np.dot(X, W1) + b1
-        L1 = np.maximum(L1, 0) #ReLU
-        L2 = np.dot(L1, W2) + b2
-        scores = L2
+        L = np.dot(X, W1) + b1
+        L = np.maximum(L, 0) #ReLU
+        scores = np.dot(L, W2) + b2
         
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -89,11 +88,16 @@ class TwoLayerNet(object):
         if y is None:
             return scores
 
-        # Compute the loss
-        L_exp = np.exp(L2)
-        L_sum = L_exp.sum(axis=1).re
+        #Softmax
+        score_exp = np.exp(scores)
+        sum_scores = score_exp.sum(axis=1).reshape((N, 1))
+        normalized_scores = score_exp/sum_scores
         
-        loss = None
+        # Compute the loss
+        log_loss = np.sum(-np.log(normalized_scores[range(N), y]))/N
+        L2_loss = (np.sum(np.square(W1)) + np.sum(np.square(W2)))*reg/2 # L2 Regularization
+        loss = log_loss + L2_loss
+        
         #############################################################################
         # TODO: Finish the forward pass, and compute the loss. This should include  #
         # both the data loss and L2 regularization for W1 and W2. Store the result  #
